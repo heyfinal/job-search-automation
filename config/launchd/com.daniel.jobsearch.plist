@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Job identifier -->
+    <key>Label</key>
+    <string>com.daniel.jobsearch</string>
+
+    <!-- Description -->
+    <key>ServiceDescription</key>
+    <string>Automated Job Search and Matching System</string>
+
+    <!-- Program to run -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>-m</string>
+        <string>src.orchestrator</string>
+    </array>
+
+    <!-- Working directory -->
+    <key>WorkingDirectory</key>
+    <string>/Users/daniel/workapps/job-search-automation</string>
+
+    <!-- Schedule: Run daily at 5:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>5</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- Environment variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/daniel/workapps/job-search-automation</string>
+        <key>HOME</key>
+        <string>/Users/daniel</string>
+    </dict>
+
+    <!-- Log files -->
+    <key>StandardOutPath</key>
+    <string>/Users/daniel/workapps/job-search-automation/logs/launchd_stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/daniel/workapps/job-search-automation/logs/launchd_stderr.log</string>
+
+    <!-- Run at load (for testing, set to true) -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- Keep alive options -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <!-- Nice level (lower priority) -->
+    <key>Nice</key>
+    <integer>10</integer>
+
+    <!-- Timeout (10 minutes max) -->
+    <key>TimeOut</key>
+    <integer>600</integer>
+
+    <!-- Throttle interval (prevent rapid restarts) -->
+    <key>ThrottleInterval</key>
+    <integer>300</integer>
+
+    <!-- Start on network available -->
+    <key>StartOnMount</key>
+    <false/>
+
+    <!-- Low priority I/O -->
+    <key>LowPriorityIO</key>
+    <true/>
+
+    <!-- Process type -->
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>
