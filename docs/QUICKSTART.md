@@ -21,11 +21,9 @@ Expected output:
 Credential Status:
   openai: OK
   github: OK (or MISSING - optional)
-  brave: MISSING (optional)
-  tavily: MISSING (optional)
 ```
 
-Only OpenAI is required. Others are optional but improve job discovery.
+Only OpenAI is required.
 
 ### 3. Run First Search
 

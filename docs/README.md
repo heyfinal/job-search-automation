@@ -5,7 +5,7 @@ An intelligent, autonomous job search and matching system that runs daily to fin
 ## Features
 
 - **Automated Daily Execution**: Runs at 5 AM via macOS launchd
-- **Multi-Source Search**: Searches LinkedIn, Indeed, RemoteOK, and more via Brave/Tavily APIs
+- **Multi-Source Search**: USAJOBS API, Oklahoma energy company career pages, Playwright-powered Indeed scraping (no credit card required)
 - **AI-Powered Matching**: Uses GPT-4 for intelligent skill-to-job matching
 - **Comprehensive Profiling**: Extracts skills from GitHub repos and resumes
 - **Beautiful Reports**: Generates HTML and Markdown reports with top matches
@@ -99,14 +99,10 @@ The system uses API keys from `~/databases/productivity.db` credentials table:
 |---------|-------|----------|
 | `openai` | GPT-4 for AI matching | Yes |
 | `github_personal_token` | GitHub API access | Optional |
-| `brave` | Brave Search API | Optional |
-| `tavily` | Tavily Search API | Optional |
 
 You can also set environment variables:
 - `OPENAI_API_KEY`
 - `GITHUB_TOKEN`
-- `BRAVE_API_KEY`
-- `TAVILY_API_KEY`
 
 ### Search Queries
 

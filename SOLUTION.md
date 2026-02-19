@@ -3,6 +3,8 @@
 **Date**: January 10, 2026
 **Status**: System working correctly, but needs better job sources
 
+> Update: Brave/Tavily API paths removed (they now require a credit card). Use the built-in free sources instead: USAJOBS, company career scrapers, and the Playwright Indeed scraper.
+
 ---
 
 ## ✅ What's Working
@@ -42,6 +44,8 @@
 ---
 
 ## 🎯 THE SOLUTION: Add Better Job Sources
+
+**Current (no-credit-card) approach**: Use the built-in free sources—USAJOBS federal API, Oklahoma energy company career scrapers, and the Playwright-based Indeed scraper. Legacy Brave/Tavily notes below are kept for reference but can be skipped.
 
 ### Problem
 RemoteOK = Tech jobs only

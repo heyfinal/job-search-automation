@@ -73,9 +73,10 @@ class SearchConfig:
 
     # Sources to search
     sources: List[str] = field(default_factory=lambda: [
-        "brave",
-        "tavily",
-        "remoteok",
+        "usajobs",
+        "company_careers",
+        "indeed_playwright",
+        "rss_feeds",
     ])
 
     # Rate limiting

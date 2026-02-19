@@ -107,6 +107,11 @@ def get_openai_key() -> Optional[str]:
     return get_credential_manager().get('openai', 'OPENAI_API_KEY')
 
 
+def get_deepseek_key() -> Optional[str]:
+    """Get DeepSeek API key."""
+    return get_credential_manager().get('deepseek', 'DEEPSEEK_API_KEY')
+
+
 def get_github_token() -> Optional[str]:
     """Get GitHub personal access token."""
     # Try the specific token first, then the general one
@@ -142,6 +147,4 @@ def validate_credentials() -> Dict[str, bool]:
     return {
         'openai': bool(get_openai_key()),
         'github': bool(get_github_token()),
-        'brave': bool(get_brave_api_key()),
-        'tavily': bool(get_tavily_api_key()),
     }

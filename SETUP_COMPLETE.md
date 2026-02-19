@@ -4,6 +4,8 @@
 **Location**: `/Users/daniel/workapps/job-search-automation/`
 **Status**: ✅ Installed and Running
 
+> Update: Brave/Tavily API setup is deprecated (requires a credit card). System now relies on free sources (USAJOBS, company career scrapers, Playwright Indeed).
+
 ---
 
 ## 🚀 What Was Built
@@ -49,7 +51,7 @@ An elite autonomous job search platform that:
 ### ⚠️ Areas for Improvement
 1. **GitHub API**: 401 error (token may need refresh)
 2. **Job Sources**: Currently only RemoteOK is active
-   - Need to enable Brave Search or Tavily for better HSE/Operations job coverage
+   - Use free sources instead: USAJOBS, company career scrapers, Playwright Indeed (no credit card)
 3. **Job Relevance**: First batch was mostly software engineering roles
    - System needs HSE/Oil & Gas specific job boards
 

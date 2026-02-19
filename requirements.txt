@@ -23,3 +23,6 @@ mypy>=1.5.0
 
 # Type stubs
 types-aiofiles>=23.2.0
+
+# Browser automation
+playwright>=1.57.0

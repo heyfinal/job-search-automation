@@ -90,7 +90,7 @@ class PlaywrightIndeedScraper:
                 )
 
                 # Process each query
-                for query in queries[:5]:  # Limit to top 5 queries
+                for query in queries[:8]:  # Search 8 diverse queries across categories
                     logger.info(f"🔍 Searching Indeed: '{query}' in {location}")
 
                     try:

@@ -1,6 +1,6 @@
 """
 AI Matching Engine Sub-Agent
-Uses OpenAI GPT-4 for intelligent job-candidate matching and scoring.
+Uses DeepSeek Chat for intelligent job-candidate matching and scoring.
 """
 
 import json
@@ -12,7 +12,7 @@ import logging
 import re
 
 from src.database import DatabaseManager, get_db
-from src.utils.credentials import get_openai_key
+from src.utils.credentials import get_deepseek_key
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,9 @@ class JobMatcher:
 
     def __init__(self, db: DatabaseManager = None):
         self.db = db or get_db()
-        self.openai_key = get_openai_key()
-        self.model = "gpt-4"
+        self.api_key = get_deepseek_key()
+        self.model = "deepseek-chat"
+        self.api_base = "https://api.deepseek.com"
 
     async def match_jobs_for_profile(
         self,
@@ -86,22 +87,39 @@ class JobMatcher:
             for job, result in zip(batch, batch_results):
                 if result and result['overall_score'] >= self.MIN_SCORE:
                     # Save match to database
-                    match_id = self.db.add_job_match(
-                        profile_id=profile_id,
-                        job_id=job['id'],
-                        overall_score=result['overall_score'],
-                        skill_match_score=result.get('skill_match_score'),
-                        experience_match_score=result.get('experience_match_score'),
-                        location_match_score=result.get('location_match_score'),
-                        salary_match_score=result.get('salary_match_score'),
-                        culture_fit_score=result.get('culture_fit_score'),
-                        match_reasoning=result.get('reasoning'),
-                        matched_skills=json.dumps(result.get('matched_skills', [])),
-                        missing_skills=json.dumps(result.get('missing_skills', [])),
-                        strengths=json.dumps(result.get('strengths', [])),
-                        concerns=json.dumps(result.get('concerns', [])),
-                        recommendation=result.get('recommendation')
-                    )
+                    try:
+                        # Ensure all list/dict fields are properly JSON-encoded strings
+                        matched_skills = result.get('matched_skills', [])
+                        missing_skills = result.get('missing_skills', [])
+                        strengths = result.get('strengths', [])
+                        concerns = result.get('concerns', [])
+
+                        # Convert to JSON strings if not already
+                        matched_skills_json = json.dumps(matched_skills) if isinstance(matched_skills, (list, dict)) else str(matched_skills)
+                        missing_skills_json = json.dumps(missing_skills) if isinstance(missing_skills, (list, dict)) else str(missing_skills)
+                        strengths_json = json.dumps(strengths) if isinstance(strengths, (list, dict)) else str(strengths)
+                        concerns_json = json.dumps(concerns) if isinstance(concerns, (list, dict)) else str(concerns)
+
+                        match_id = self.db.add_job_match(
+                            profile_id=profile_id,
+                            job_id=job['id'],
+                            overall_score=result['overall_score'],
+                            skill_match_score=result.get('skill_match_score'),
+                            experience_match_score=result.get('experience_match_score'),
+                            location_match_score=result.get('location_match_score'),
+                            salary_match_score=result.get('salary_match_score'),
+                            culture_fit_score=result.get('culture_fit_score'),
+                            match_reasoning=str(result.get('reasoning', '')),
+                            matched_skills=matched_skills_json,
+                            missing_skills=missing_skills_json,
+                            strengths=strengths_json,
+                            concerns=concerns_json,
+                            recommendation=str(result.get('recommendation', 'unknown'))
+                        )
+                    except Exception as e:
+                        logger.error(f"Failed to save match for job {job.get('title')}: {e}")
+                        logger.debug(f"Result data: {result}")
+                        continue
                     result['match_id'] = match_id
                     result['job'] = job
                     matches.append(result)
@@ -131,7 +149,7 @@ class JobMatcher:
                 }
 
             # Use AI for detailed analysis
-            if self.openai_key:
+            if self.api_key:
                 return await self._ai_match(profile_data, job)
             else:
                 # Fall back to heuristic matching
@@ -233,7 +251,7 @@ class JobMatcher:
         }
 
     async def _ai_match(self, profile_data: Dict, job: Dict) -> Dict:
-        """Use OpenAI GPT-4 for intelligent matching."""
+        """Use DeepSeek Chat for intelligent matching."""
         profile = profile_data.get('profile', {})
         skills = profile_data.get('skills', [])
         experiences = profile_data.get('experiences', [])
@@ -288,25 +306,33 @@ Provide a JSON response with:
 6. culture_fit_score (0-100): Likely culture/industry fit
 7. matched_skills: Array of matching skills
 8. missing_skills: Array of missing required skills
-9. strengths: Array of candidate strengths for this role
-10. concerns: Array of potential concerns or gaps
-11. reasoning: 2-3 sentence explanation
+9. strengths: Array of KEY JOB REQUIREMENTS extracted from posting (e.g., "OSHA cert required", "5+ years experience", "Team leadership")
+10. concerns: Array of ROLE EXPECTATIONS from posting (e.g., "Manage 5 people", "On-call rotation", "Travel 25%", "Field work")
+11. reasoning: Extract and list the specific JOB REQUIREMENTS and ROLE EXPECTATIONS. Focus on what the job NEEDS, not candidate qualifications.
 12. recommendation: "strong_match", "good_match", "possible_match", or "poor_match"
 
-Consider:
-- The candidate is transitioning to office/hybrid/remote roles due to an ankle injury
-- 20+ years of HSE and operations experience is highly valuable
-- Oil & gas industry experience transfers well to other high-risk industries
-- Leadership and compliance experience is transferable
+CRITICAL SCORING GUIDANCE:
+- strengths = JOB REQUIREMENTS (what they want)
+- concerns = ROLE EXPECTATIONS (what you'll do)
+- reasoning = Details about the role itself
+
+SCORING RULES:
+- This candidate has 20+ years in operations, safety, logistics, vendor management, budgets, and drilling.
+- Score TRANSFERABLE SKILLS generously. Operations management, team leadership, budget management, vendor coordination, project execution, scheduling, and stakeholder communication apply to MANY industries.
+- A job requiring "operations management" or "team leadership" or "budget management" should score 65-80% even if it's not oil & gas.
+- Only score below 50% if the job requires highly specialized technical skills the candidate clearly lacks (e.g., software engineering, medical license, accounting CPA).
+- Safety/HSE jobs that directly match should score 80-90%.
+- Operations/construction/logistics jobs should score 65-80% based on transferable experience.
+- Do NOT penalize heavily for industry differences - management skills transfer across industries.
 
 Respond ONLY with valid JSON, no markdown formatting."""
 
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    "https://api.openai.com/v1/chat/completions",
+                    f"{self.api_base}/v1/chat/completions",
                     headers={
-                        "Authorization": f"Bearer {self.openai_key}",
+                        "Authorization": f"Bearer {self.api_key}",
                         "Content-Type": "application/json"
                     },
                     json={
@@ -321,7 +347,7 @@ Respond ONLY with valid JSON, no markdown formatting."""
                 ) as response:
                     if response.status != 200:
                         error = await response.text()
-                        logger.error(f"OpenAI API error: {response.status} - {error}")
+                        logger.error(f"DeepSeek API error: {response.status} - {error}")
                         return self._heuristic_match(profile_data, job)
 
                     data = await response.json()

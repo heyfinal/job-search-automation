@@ -230,7 +230,7 @@ class DatabaseManager:
         external_id = kwargs.get('external_id')
 
         with self.connection() as conn:
-            # Check for existing
+            # Check for existing by external_id
             if external_id:
                 cursor = conn.execute(
                     "SELECT id FROM job_listings WHERE source = ? AND external_id = ?",
@@ -239,6 +239,15 @@ class DatabaseManager:
                 existing = cursor.fetchone()
                 if existing:
                     return existing['id'], False
+
+            # Check for existing by title+company (case-insensitive dedup)
+            cursor = conn.execute(
+                "SELECT id FROM job_listings WHERE LOWER(title) = LOWER(?) AND LOWER(company_name) = LOWER(?)",
+                (title, company_name)
+            )
+            existing = cursor.fetchone()
+            if existing:
+                return existing['id'], False
 
             # Get or create company
             company_id = self.get_or_create_company(company_name)
